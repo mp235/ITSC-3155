@@ -1,1 +1,104 @@
+### Data ###
 
+recipes = {
+    "small": {
+        "ingredients": {
+            "bread": 2,  ## slice
+            "ham": 4,  ## slice
+            "cheese": 4,  ## ounces
+        },
+        "cost": 1.75,
+    },
+    "medium": {
+        "ingredients": {
+            "bread": 4,  ## slice
+            "ham": 6,  ## slice
+            "cheese": 8,  ## ounces
+        },
+        "cost": 3.25,
+    },
+    "large": {
+        "ingredients": {
+            "bread": 6,  ## slice
+            "ham": 8,  ## slice
+            "cheese": 12,  ## ounces
+        },
+        "cost": 5.5,
+    }
+}
+
+resources = {
+    "bread": 12,  ## slice
+    "ham": 18,  ## slice
+    "cheese": 24,  ## ounces
+}
+
+
+### Complete functions ###
+
+class SandwichMachine:
+
+    def __init__(self, machine_resources):
+        """Initialize sandwich machine with resources."""
+        self.machine_resources = machine_resources
+
+    def check_resources(self, ingredients):
+        """Check if enough ingredients."""
+        for ingredient, quantity in ingredients.items():
+            if ingredient not in self.machine_resources or self.machine_resources[ingredient] < quantity:
+                return False
+        return True
+
+    def process_coins(self):
+        """Process coins inserted by the user and return total."""
+        large_dollars = int(input("how many large dollars?: "))
+        half_dollars = int(input("how many half dollars?: "))
+        quarters = int(input("how many quarters?: "))
+        nickels = int(input("how many nickels?: "))
+
+        total_value = large_dollars + 0.5 * half_dollars + 0.25 * quarters + 0.05 * nickels
+        return total_value
+
+    def transaction_result(self, coins, cost):
+        """Check if inserted enough money to purchase the sandwich."""
+        if coins >= cost:
+            change = coins - cost
+            if change > 0:
+                print(f"Here is ${change:.2f} in change.")
+            return True
+        else:
+            print("Sorry, that's not enough money. Money refunded.")
+            return False
+
+    def make_sandwich(self, sandwich_size, order_ingredients):
+        """Deduct ingredients from resources and print a message."""
+        if self.check_resources(order_ingredients):
+            for ingredient, quantity in order_ingredients.items():
+                self.machine_resources[ingredient] -= quantity
+            print(f"{sandwich_size} sandwich is ready. Bon appetit!")
+
+# Initialize the SandwichMachine with initial resources
+sandwich_machine = SandwichMachine(resources)
+
+while True:
+    user_input = input("What would you like? (small/medium/large/off/report): ").strip().lower()
+
+    if user_input == "off":
+        break
+    elif user_input == "report":
+        for resource, quantity in sandwich_machine.machine_resources.items():
+            print(f"{resource.capitalize()}: {quantity} {('slice(s)' if resource == 'bread' else 'ounce(s)') if resource == 'cheese' else 'slice(s)' if resource == 'ham' else 'slice(s)'}")
+    elif user_input in recipes:
+        sandwich_size = user_input
+        ingredients_needed = recipes[sandwich_size]["ingredients"]
+        cost = recipes[sandwich_size]["cost"]
+
+        if sandwich_machine.check_resources(ingredients_needed):
+            print("Please insert coins.")
+            coins_inserted = sandwich_machine.process_coins()
+            if sandwich_machine.transaction_result(coins_inserted, cost):
+                sandwich_machine.make_sandwich(sandwich_size, ingredients_needed)
+        else:
+            print(f"Sorry, there is not enough {('bread' if 'bread' in ingredients_needed else 'ham' if 'ham' in ingredients_needed else 'cheese')}.")
+
+print("Machine turned off.")
